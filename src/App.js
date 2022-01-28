@@ -1,25 +1,44 @@
-import logo from './logo.svg';
-import './App.css';
+// React
+import React, { useEffect } from 'react';
+import { connect } from 'react-redux';
 
-function App() {
+import { fetchStart, fetchSuccess } from './actions';
+// CSS
+import './App.css';
+// Components
+import ActivityItem from './components/ActivityItem';
+
+
+import axios from 'axios';
+
+const App = (props) => {
+  const { loading, error, fetchStart, fetchSuccess } = props;
+  
+  useEffect(() => {
+    fetchStart();
+    axios.get("https://www.boredapi.com/api/activity")
+      .then(resp => {
+        fetchSuccess(resp.data);
+      });
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app">
+      <h3>Activities to do When You're Bored!</h3>
+
+      {(error !== "") && <p className='error-msg'>{error}</p>}
+      {loading ? <h4>Loading activities...</h4> : <ActivityItem />}
+
+      <h4>Refresh for new activity.</h4>
     </div>
   );
 }
 
-export default App;
+const mapStateToProps = (state) => {
+  return {
+    loading: state.loading,
+    error: state.error,
+  };
+};
+
+export default connect(mapStateToProps, { fetchStart, fetchSuccess })(App);
